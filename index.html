@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Private Cinema 💜</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;color:#fff;background:radial-gradient(circle at top,#49205f,#160d29 65%);min-height:100vh}
+header{text-align:center;padding:35px 15px 20px}
+.heart{font-size:45px}
+h1{margin:10px 0;color:#ffc2e1;font-size:clamp(28px,5vw,45px)}
+header p{color:#e3cde9}
+main{width:min(900px,92%);margin:auto}
+.card{background:#ffffff0c;border:1px solid #ffffff26;border-radius:20px;padding:22px;margin:18px 0;box-shadow:0 10px 35px #0002}
+h2{color:#f6bce2;margin-top:0}
+input,button,textarea{font:inherit;border-radius:10px;padding:12px;border:1px solid #d8b7e6}
+input,textarea{width:100%;margin:7px 0;background:#fff;color:#251333}
+button{background:#ed8dc9;color:#2b1237;border:0;font-weight:bold;cursor:pointer;margin:5px 0}
+button:hover{filter:brightness(1.08)}
+video,iframe{width:100%;border:0;border-radius:12px}
+.note{font-size:13px;color:#d8c8e4;line-height:1.6}
+#chatLog{height:130px;overflow:auto;background:#160d29;border-radius:10px;padding:12px;margin:10px 0;white-space:pre-wrap}
+footer{text-align:center;padding:25px;color:#d8c8e4}
+</style>
+</head>
+<body>
+<header>
+<div class="heart">💗 🎬 💜</div>
+<h1>Our Private Cinema</h1>
+<p>Two hearts, one little cinema under the stars ✨</p>
+</header>
+<main>
+<section class="card">
+<h2>🌙 Our Movie Night</h2>
+<p>Apna YouTube video link yahan paste karo:</p>
+<input id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+<button onclick="loadMovie()">Open movie</button>
+<div id="movie" style="margin-top:15px"></div>
+<p class="note">YouTube video kholne ke baad play/pause manually kar sakte ho. Ye basic version synchronized playback nahi karta.</p>
+</section>
+<section class="card">
+<h2>💌 Our Little Chat</h2>
+<div id="chatLog">Welcome to your little cinema 💜</div>
+<input id="message" placeholder="Write a sweet message...">
+<button onclick="sendMessage()">Send message</button>
+<p class="note">Ye demo chat sirf isi browser mein messages dikhati hai; partner ko messages send nahi hote.</p>
+</section>
+<section class="card">
+<h2>📹 Our Video Call</h2>
+<p>Video call ke liye free meeting room khol sakte ho.</p>
+<button onclick="window.open('https://meet.jit.si/OurPrivateCinemaRoom2026','_blank')">Open video call</button>
+<p class="note">Meeting link jiske paas hoga, woh join karne ki koshish kar sakta hai. Ye button private login nahi banata.</p>
+</section>
+</main>
+<footer>Made with 💜 just for two</footer>
+<script>
+function loadMovie(){
+ const url=document.getElementById('videoUrl').value.trim();
+ const match=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+ const box=document.getElementById('movie');
+ if(!match){box.textContent='Please enter a valid YouTube video link.';return;}
+ box.innerHTML='<iframe height="315" allowfullscreen allow="encrypted-media; picture-in-picture" src="https://www.youtube-nocookie.com/embed/'+match[1]+'"></iframe>';
+}
+function sendMessage(){
+ const input=document.getElementById('message');
+ const value=input.value.trim();
+ if(!value)return;
+ const log=document.getElementById('chatLog');
+ log.textContent+='\\nYou: '+value;
+ log.scrollTop=log.scrollHeight;
+ input.value='';
+}
+</script>
+</body>
+</html>
