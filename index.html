@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,71 +6,380 @@
 <title>Our Private Cinema 💜</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;color:#fff;background:radial-gradient(circle at top,#49205f,#160d29 65%);min-height:100vh}
-header{text-align:center;padding:35px 15px 20px}
-.heart{font-size:45px}
-h1{margin:10px 0;color:#ffc2e1;font-size:clamp(28px,5vw,45px)}
-header p{color:#e3cde9}
+body{margin:0;font-family:Arial,sans-serif;color:#fff;
+background:radial-gradient(circle at top,#49205f,#160d29 65%);min-height:100vh}
+header{text-align:center;padding:30px 15px 15px}
+.heart{font-size:42px}
+h1{margin:10px 0;color:#ffc2e1;font-size:clamp(28px,5vw,43px)}
+header p,.note{color:#e3cde9}
 main{width:min(900px,92%);margin:auto}
-.card{background:#ffffff0c;border:1px solid #ffffff26;border-radius:20px;padding:22px;margin:18px 0;box-shadow:0 10px 35px #0002}
+.card{background:#ffffff0c;border:1px solid #ffffff26;
+border-radius:20px;padding:22px;margin:18px 0;box-shadow:0 10px 35px #0002}
 h2{color:#f6bce2;margin-top:0}
-input,button,textarea{font:inherit;border-radius:10px;padding:12px;border:1px solid #d8b7e6}
-input,textarea{width:100%;margin:7px 0;background:#fff;color:#251333}
+input,button{font:inherit;border-radius:10px;padding:12px;border:1px solid #d8b7e6}
+input{width:100%;margin:7px 0;background:#fff;color:#251333}
 button{background:#ed8dc9;color:#2b1237;border:0;font-weight:bold;cursor:pointer;margin:5px 0}
 button:hover{filter:brightness(1.08)}
-video,iframe{width:100%;border:0;border-radius:12px}
-.note{font-size:13px;color:#d8c8e4;line-height:1.6}
-#chatLog{height:130px;overflow:auto;background:#160d29;border-radius:10px;padding:12px;margin:10px 0;white-space:pre-wrap}
+button:disabled{opacity:.55;cursor:not-allowed}
+iframe{width:100%;border:0;border-radius:12px}
+.note{font-size:13px;line-height:1.6}
+#chatLog{height:220px;overflow:auto;background:#160d29;border-radius:10px;
+padding:12px;margin:10px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.chat-row{display:flex;gap:8px;align-items:center}
+.chat-row input{flex:1;min-width:0}
+.chat-row button{flex-shrink:0}
+.status{padding:10px;border-radius:10px;background:#ffffff12;line-height:1.5}
+.hidden{display:none!important}
 footer{text-align:center;padding:25px;color:#d8c8e4}
 </style>
 </head>
 <body>
 <header>
-<div class="heart">💗 🎬 💜</div>
-<h1>Our Private Cinema</h1>
-<p>Two hearts, one little cinema under the stars ✨</p>
+  <div class="heart">💗 🎬 💜</div>
+  <h1>Our Private Cinema</h1>
+  <p>Two hearts, one little cinema under the stars ✨</p>
 </header>
+
 <main>
-<section class="card">
-<h2>🌙 Our Movie Night</h2>
-<p>Apna YouTube video link yahan paste karo:</p>
-<input id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
-<button onclick="loadMovie()">Open movie</button>
-<div id="movie" style="margin-top:15px"></div>
-<p class="note">YouTube video kholne ke baad play/pause manually kar sakte ho. Ye basic version synchronized playback nahi karta.</p>
-</section>
-<section class="card">
-<h2>💌 Our Little Chat</h2>
-<div id="chatLog">Welcome to your little cinema 💜</div>
-<input id="message" placeholder="Write a sweet message...">
-<button onclick="sendMessage()">Send message</button>
-<p class="note">Ye demo chat sirf isi browser mein messages dikhati hai; partner ko messages send nahi hote.</p>
-</section>
-<section class="card">
-<h2>📹 Our Video Call</h2>
-<p>Video call ke liye free meeting room khol sakte ho.</p>
-<button onclick="window.open('https://meet.jit.si/OurPrivateCinemaRoom2026','_blank')">Open video call</button>
-<p class="note">Meeting link jiske paas hoga, woh join karne ki koshish kar sakta hai. Ye button private login nahi banata.</p>
-</section>
+  <section class="card" id="loginCard">
+    <h2>🔐 Our Private Login</h2>
+    <p>Sign in using your allowed Google account.</p>
+    <button id="loginBtn">Sign in with Google</button>
+    <p class="note">Only the two accounts configured for this room are allowed.</p>
+    <div id="loginStatus" class="status" aria-live="polite">Please sign in.</div>
+  </section>
+
+  <div id="cinema" class="hidden">
+    <section class="card">
+      <h2>🌙 Our Movie Night</h2>
+      <p id="welcome"></p>
+      <label for="videoUrl">YouTube video link</label>
+      <input id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+      <button id="openMovieBtn">Open movie for both of us</button>
+      <div id="movie" style="margin-top:15px">
+        <div id="ytPlayer"></div>
+      </div>
+      <p class="note">
+        YouTube playback changes are shared with the other signed-in person.
+        Some videos may block embedding or have regional restrictions.
+      </p>
+      <button id="signOutBtn">Sign out</button>
+    </section>
+
+    <section class="card">
+      <h2>💌 Our Little Chat</h2>
+      <div id="chatLog" aria-live="polite">Welcome to your little cinema 💜</div>
+      <div class="chat-row">
+        <input id="message" maxlength="1000" placeholder="Write a sweet message...">
+        <button id="sendBtn">Send</button>
+      </div>
+      <p class="note">Messages are stored in Firebase for the authorized room members.</p>
+    </section>
+
+    <section class="card">
+      <h2>📹 Our Video Call</h2>
+      <p>Open a separate video-call room.</p>
+      <button id="callBtn">Open video call</button>
+      <p class="note">
+        This uses a public Jitsi meeting link. It is not protected by this website's
+        login, so do not treat it as a private or authenticated call.
+      </p>
+    </section>
+  </div>
 </main>
+
 <footer>Made with 💜 just for two</footer>
-<script>
-function loadMovie(){
- const url=document.getElementById('videoUrl').value.trim();
- const match=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
- const box=document.getElementById('movie');
- if(!match){box.textContent='Please enter a valid YouTube video link.';return;}
- box.innerHTML='<iframe height="315" allowfullscreen allow="encrypted-media; picture-in-picture" src="https://www.youtube-nocookie.com/embed/'+match[1]+'"></iframe>';
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script type="module">
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup,
+  onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import {
+  getDatabase, ref, set, push, onValue, onChildAdded
+} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+
+/* Firebase project configuration */
+const firebaseConfig = {
+  apiKey: "AIzaSyDc_jwy409U7mETifEHQQUTkq7Zrek-g",
+  authDomain: "our-private-cinema.firebaseapp.com",
+  databaseURL: "https://our-private-cinema-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "our-private-cinema",
+  storageBucket: "our-private-cinema.firebasestorage.app",
+  messagingSenderId: "167619661454",
+  appId: "1:167619661454:web:63f02a35bcf2b4a03e83df",
+  measurementId: "G-FZYC5HHGWF"
+};
+
+/* Replace both placeholders with the two Google account email addresses. */
+const ALLOWED_EMAILS = [
+  "aibrixton@gmail.com",
+  "aiforhim7@gmail.com"
+].map(email => email.toLowerCase().trim());
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
+
+const roomPath = "rooms/our-private-cinema";
+const messagesRef = ref(db, roomPath + "/messages");
+const playbackRef = ref(db, roomPath + "/playback");
+
+const $ = id => document.getElementById(id);
+let currentUser = null;
+let player = null;
+let ytReady = false;
+let currentVideoId = "";
+let applyingRemote = false;
+let latestPlayback = null;
+let stopChatListener = null;
+let stopPlaybackListener = null;
+let syncTimer = null;
+
+function showStatus(message) {
+  $("loginStatus").textContent = message;
 }
-function sendMessage(){
- const input=document.getElementById('message');
- const value=input.value.trim();
- if(!value)return;
- const log=document.getElementById('chatLog');
- log.textContent+='\\nYou: '+value;
- log.scrollTop=log.scrollHeight;
- input.value='';
+function setLoggedIn(isLoggedIn) {
+  $("loginCard").classList.toggle("hidden", isLoggedIn);
+  $("cinema").classList.toggle("hidden", !isLoggedIn);
 }
+function getYouTubeId(url) {
+  try {
+    const parsed = new URL(url);
+    let id = "";
+    if (parsed.hostname === "youtu.be") {
+      id = parsed.pathname.split("/").filter(Boolean)[0] || "";
+    } else if (
+      parsed.hostname === "youtube.com" ||
+      parsed.hostname.endsWith(".youtube.com") ||
+      parsed.hostname === "www.youtube-nocookie.com"
+    ) {
+      id = parsed.searchParams.get("v") || "";
+      if (!id) {
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        if (["embed", "shorts", "live"].includes(parts[0])) id = parts[1] || "";
+      }
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : "";
+  } catch {
+    return "";
+  }
+}
+
+$("loginBtn").addEventListener("click", async () => {
+  try {
+    showStatus("Opening Google sign-in…");
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    showStatus("Login error: " + error.message);
+  }
+});
+
+$("signOutBtn").addEventListener("click", async () => {
+  try { await signOut(auth); }
+  catch (error) { alert("Sign-out error: " + error.message); }
+});
+
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+
+  if (stopChatListener) stopChatListener();
+  if (stopPlaybackListener) stopPlaybackListener();
+  stopChatListener = null;
+  stopPlaybackListener = null;
+  $("chatLog").textContent = "Welcome to your little cinema 💜";
+
+  if (!user) {
+    setLoggedIn(false);
+    showStatus("Please sign in with Google.");
+    return;
+  }
+
+  const email = (user.email || "").toLowerCase();
+  const placeholdersStillPresent = ALLOWED_EMAILS.some(email =>
+    email.startsWith("your_google_email") ||
+    email.startsWith("partner_google_email")
+  );
+
+  if (placeholdersStillPresent || !ALLOWED_EMAILS.includes(email)) {
+    await signOut(auth);
+    setLoggedIn(false);
+    showStatus("This Google account is not on the room's allowed list. Check the two email placeholders in index.html.");
+    return;
+  }
+
+  setLoggedIn(true);
+  $("welcome").textContent = "Signed in as " + user.email + " 💜";
+
+  stopChatListener = onChildAdded(messagesRef, snapshot => {
+    const message = snapshot.val();
+    if (!message || typeof message.text !== "string") return;
+
+    const line = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = (message.name || "Guest") + ": ";
+    const text = document.createElement("span");
+    text.textContent = message.text;
+    line.append(name, text);
+    $("chatLog").appendChild(line);
+    $("chatLog").scrollTop = $("chatLog").scrollHeight;
+  }, error => showStatus("Chat error: " + error.message));
+
+  stopPlaybackListener = onValue(playbackRef, snapshot => {
+    const data = snapshot.val();
+    if (!data || !data.videoId) return;
+    latestPlayback = data;
+    if (data.updatedBy === currentUser?.uid) return;
+    applyPlayback(data);
+  }, error => showStatus("Playback sync error: " + error.message));
+
+  startPositionSync();
+});
+
+$("sendBtn").addEventListener("click", sendMessage);
+$("message").addEventListener("keydown", event => {
+  if (event.key === "Enter") sendMessage();
+});
+
+async function sendMessage() {
+  const text = $("message").value.trim();
+  if (!text || !currentUser) return;
+
+  try {
+    await push(messagesRef, {
+      text,
+      name: currentUser.displayName || currentUser.email,
+      uid: currentUser.uid,
+      timestamp: Date.now()
+    });
+    $("message").value = "";
+  } catch (error) {
+    alert("Message send nahi hua: " + error.message);
+  }
+}
+
+window.onYouTubeIframeAPIReady = () => {
+  ytReady = true;
+  if (latestPlayback?.videoId) applyPlayback(latestPlayback);
+};
+
+function createPlayer(videoId) {
+  if (!ytReady || !window.YT?.Player) return;
+  currentVideoId = videoId;
+  $("movie").innerHTML = '<div id="ytPlayer"></div>';
+
+  player = new YT.Player("ytPlayer", {
+    width: "100%",
+    height: "390",
+    videoId,
+    playerVars: { playsinline: 1 },
+    events: {
+      onReady: () => {
+        if (latestPlayback) applyPlayback(latestPlayback);
+      },
+      onStateChange: event => {
+        if (applyingRemote || !currentUser) return;
+        let state = "paused";
+        if (event.data === YT.PlayerState.PLAYING) state = "playing";
+        else if (event.data === YT.PlayerState.ENDED) state = "ended";
+        else if (event.data !== YT.PlayerState.PAUSED) return;
+        publishPlayback(state);
+      },
+      onError: () => {
+        showStatus("YouTube could not play this video. Try another embeddable video.");
+      }
+    }
+  });
+}
+
+
+$("openMovieBtn").addEventListener("click", async () => {
+  if (!currentUser) {
+    alert("Pehle Google se login karo.");
+    return;
+  }
+
+  const videoId = getYouTubeId($("videoUrl").value.trim());
+
+  if (!videoId) {
+    alert("Please enter a valid YouTube video link.");
+    return;
+  }
+
+  const data = {
+    videoId: videoId,
+    currentTime: 0,
+    state: "paused",
+    updatedBy: currentUser.uid,
+    updatedAt: Date.now()
+  };
+
+  try {
+    latestPlayback = data;
+    applyPlayback(data);
+    await set(playbackRef, data);
+    showStatus("Movie link share ho gaya!");
+  } catch (error) {
+    alert("Movie link share nahi hua: " + error.message);
+  }
+});
+
+function applyPlayback(data) {
+  if (!ytReady || !window.YT?.Player || !data?.videoId) return;
+
+  if (!player || currentVideoId !== data.videoId) {
+    latestPlayback = data;
+    createPlayer(data.videoId);
+    return;
+  }
+
+  if (player.getPlayerState && player.getPlayerState() >= -1) {
+    applyingRemote = true;
+    const target = Number(data.currentTime) || 0;
+    const actual = player.getCurrentTime ? player.getCurrentTime() : 0;
+
+    if (Math.abs(actual - target) > 2) player.seekTo(target, true);
+
+    if (data.state === "playing") player.playVideo();
+    else if (data.state === "paused") player.pauseVideo();
+    else if (data.state === "ended") player.pauseVideo();
+
+    setTimeout(() => { applyingRemote = false; }, 900);
+  }
+}
+
+async function publishPlayback(state) {
+  if (!currentUser || !player || !currentVideoId || applyingRemote) return;
+  try {
+    await set(playbackRef, {
+      videoId: currentVideoId,
+      currentTime: player.getCurrentTime ? player.getCurrentTime() : 0,
+      state,
+      updatedBy: currentUser.uid,
+      updatedAt: Date.now()
+    });
+  } catch (error) {
+    showStatus("Could not sync playback: " + error.message);
+  }
+}
+
+function startPositionSync() {
+  if (syncTimer) clearInterval(syncTimer);
+  syncTimer = setInterval(() => {
+    if (!currentUser || !player || applyingRemote || !window.YT) return;
+    if (player.getPlayerState?.() === YT.PlayerState.PLAYING) {
+      publishPlayback("playing");
+    }
+  }, 4000);
+}
+
+$("callBtn").addEventListener("click", () => {
+  window.open("https://meet.jit.si/OurPrivateCinemaRoom2026", "_blank", "noopener");
+});
 </script>
 </body>
 </html>
