@@ -200,11 +200,10 @@ onAuthStateChanged(auth, async user => {
   }
 
   const email = (user.email || "").toLowerCase();
-  const placeholdersStillPresent = ALLOWED_EMAILS.some(email =>
-    email.startsWith("aibrixton1") ||
-    email.startsWith("aiforhim7")
-  );
-
+ const placeholdersStillPresent = ALLOWED_EMAILS.some(email =>
+  email === "aibrixton1" ||
+  email === "aiforhim7"
+);
   if (placeholdersStillPresent || !ALLOWED_EMAILS.includes(email)) {
     await signOut(auth);
     setLoggedIn(false);
