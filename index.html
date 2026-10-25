@@ -90,7 +90,7 @@ footer{text-align:center;padding:25px;color:#d8c8e4}
 
 <footer>Made with 💜 just for two</footer>
 
-<script src="https://www.youtube.com/iframe_api"></script>
+
 <script type="module">
 import { initializeApp } from
   "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
@@ -265,7 +265,9 @@ window.onYouTubeIframeAPIReady = () => {
   ytReady = true;
   if (latestPlayback?.videoId) applyPlayback(latestPlayback);
 };
-
+const ytScript = document.createElement("script");
+ytScript.src = "https://www.youtube.com/iframe_api";
+document.head.appendChild(ytScript);
 function createPlayer(videoId) {
   if (!ytReady || !window.YT?.Player) return;
   currentVideoId = videoId;
