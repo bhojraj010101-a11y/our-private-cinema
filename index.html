@@ -207,7 +207,7 @@ onAuthStateChanged(auth, async user => {
   if (placeholdersStillPresent || !ALLOWED_EMAILS.includes(email)) {
     await signOut(auth);
     setLoggedIn(false);
-    showStatus("This Google account is not on the room's allowed list. Check the two email placeholders in index.html.");
+    showStatus("Google account detected: " + email + ". This account is not on the allowed list.");
     return;
   }
 
