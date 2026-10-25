@@ -99,7 +99,7 @@ import {
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import {
-  getDatabase, ref, set, push, onValue, onChildAdded
+  getDatabase, ref, set, push, onValue, remove
 } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
 
 /* Firebase project configuration */
@@ -214,20 +214,41 @@ onAuthStateChanged(auth, async user => {
   setLoggedIn(true);
   $("welcome").textContent = "Signed in as " + user.email + " 💜";
 
-  stopChatListener = onChildAdded(messagesRef, snapshot => {
-    const message = snapshot.val();
+  stopChatListener = onValue(messagesRef, snapshot => {
+  const chatLog = $("chatLog");
+  chatLog.textContent = "";
+
+  snapshot.forEach(messageSnapshot => {
+    const message = messageSnapshot.val();
     if (!message || typeof message.text !== "string") return;
 
     const line = document.createElement("div");
     const name = document.createElement("strong");
     name.textContent = (message.name || "Guest") + ": ";
+
     const text = document.createElement("span");
     text.textContent = message.text;
-    line.append(name, text);
-    $("chatLog").appendChild(line);
-    $("chatLog").scrollTop = $("chatLog").scrollHeight;
-  }, error => showStatus("Chat error: " + error.message));
 
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete";
+    deleteBtn.style.marginLeft = "8px";
+
+    deleteBtn.addEventListener("click", async () => {
+      if (!confirm("Is message ko dono taraf se delete karna hai?")) return;
+
+      try {
+        await remove(ref(db, roomPath + "/messages/" + messageSnapshot.key));
+      } catch (error) {
+        alert("Delete nahi hua: " + error.message);
+      }
+    });
+
+    line.append(name, text, deleteBtn);
+    chatLog.appendChild(line);
+  });
+
+  chatLog.scrollTop = chatLog.scrollHeight;
+}, error => showStatus("Chat error: " + error.message));
   stopPlaybackListener = onValue(playbackRef, snapshot => {
     const data = snapshot.val();
     if (!data || !data.videoId) return;
