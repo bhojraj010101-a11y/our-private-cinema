@@ -69,6 +69,7 @@ footer{text-align:center;padding:25px;color:#d8c8e4}
     <section class="card">
       <h2>💌 Our Little Chat</h2>
       <div id="chatLog" aria-live="polite">Welcome to your little cinema 💜</div>
+      <button id="clearChatBtn" type="button">🗑️ Clear Chat</button>
       <div class="chat-row">
         <input id="message" maxlength="1000" placeholder="Write a sweet message...">
         <button id="sendBtn">Send</button>
@@ -261,6 +262,20 @@ onAuthStateChanged(auth, async user => {
 });
 
 $("sendBtn").addEventListener("click", sendMessage);
+  $("clearChatBtn").addEventListener("click", async () => {
+  if (!currentUser) {
+    alert("Please sign in first.");
+    return;
+  }
+
+  if (!confirm("Delete all chat messages for both of you?")) return;
+
+  try {
+    await remove(messagesRef);
+  } catch (error) {
+    alert("Could not clear chat: " + error.message);
+  }
+});
 $("message").addEventListener("keydown", event => {
   if (event.key === "Enter") sendMessage();
 });
